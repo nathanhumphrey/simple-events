@@ -1,0 +1,1 @@
+Generic Events object that can be extended by objects to provide basic support for observation.  There are no dependencies.
