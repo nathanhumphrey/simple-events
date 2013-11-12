@@ -1,5 +1,5 @@
 /**
- * Events.js 0.1
+ * Events.js 0.1.1
  * Author: Nathan Humphrey
  * Created: November8, 2013
  *
@@ -8,7 +8,11 @@
  * 
  */ 
 (function (exports) {
- 
+  // helper function to determine if a callback is in fact a function
+  var isFunction = function (func) {
+    return (typeof func === 'function');
+  };
+
   var Events = (function () {
     // return function
     var f = function () {};
@@ -22,10 +26,15 @@
      * 
      * @param {String} event - a string name for the event to watch
      * @param {Function} callback - the observer callback function to call when the event is triggered
-     * @param {Object} obj - [optional] the observer object for callback binding
-     *
+     * @param {Object} [obj] - the observer object for callback binding
+     * @throws {Error} if callback is not a function
      */
     f.fn.on = function (event, callback, obj) {
+      // if callback is not a function, throw an exception
+      if (!isFunction(callback)) {
+        throw new Error('callback is not a function');
+      }
+
       // ensure that the instance has an events hash and check for previous callbacks
       this.events || (this.events = {});
       this.events[event] || (this.events[event] = event);
@@ -33,9 +42,7 @@
       this.callbacks || (this.callbacks = {});
       this.callbacks[event] || (this.callbacks[event] = []);
  
-      obj = obj || {dummy: 'dummy'};
-      
-      this.callbacks[event].push({obj: obj, callback: callback}); 
+      this.callbacks[event].push({obj: obj || undefined, callback: callback}); 
     };
     
     /**
@@ -44,9 +51,15 @@
      * 
      * @param {String} event - a string name for the event to remove the callback on
      * @param {Function} callback - the callback function to remove from the object's specified event
-     * @param {Object} obj - [optional] the observer object for callback binding
+     * @param {Object} [obj] - the observer object for callback binding
+     * @throws {Error} if callback is not a function
      */
     f.fn.off = function (event, callback, obj) {
+      // if callback is not a function, throw an exception
+      if (!isFunction(callback)) {
+        throw new Error('callback is not a function');
+      }
+
       var i = -1,
           callback,
           callbacks;
@@ -59,7 +72,7 @@
           while (callbackObj = callbacks[++i]) {
             
             if (callbackObj.callback === callback
-                && callbackObj.obj.dummy === 'dummy') {
+                && callbackObj.obj === undefined) {
               callbacks.splice(i, 1);
               return;
             }
@@ -90,10 +103,10 @@
       
       if (this.events && this.events[event]) {
         // retrieve, loop through and call all callbacks registered for the specified event
-        callbacks = this.callbacks[event];  	
+        callbacks = this.callbacks[event];    
         
         while (callbackObj = callbacks[++i]) {
-          callbackObj.callback.apply(callbackObj.obj, [this]);
+          callbackObj.callback.apply(callbackObj.obj || this, [this]);
         }
       }
     };
