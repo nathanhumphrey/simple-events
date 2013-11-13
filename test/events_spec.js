@@ -3,6 +3,7 @@ describe('The Events object', function () {
   var ev = null,
       spy = jasmine.createSpy('spy'),
       spy1 = jasmine.createSpy('spy1');
+      spy2 = jasmine.createSpy('spy2');
 
   beforeEach(function () {
     ev = new Events();
@@ -18,15 +19,6 @@ describe('The Events object', function () {
 
     expect(ev.callbacks['someEvent'][0]['callback']).toEqual(spy);
     expect(ev.callbacks['someEvent'][1]['callback']).toEqual(spy1);
-  });
-
-  it('removes listeners', function () {
-    ev.on('someEvent', spy);
-    ev.on('someEvent', spy1);
-
-    ev.off('someEvent', spy);
-
-    expect(ev.callbacks['someEvent'][0]['callback']).toEqual(spy1);
   });
 
   it('triggers callbacks', function () {
@@ -49,4 +41,19 @@ describe('The Events object', function () {
 
     expect(obj.foo).toBe('baz');
   });
+
+  it('removes listeners', function () {
+    var obj = {};
+
+    ev.on('someEvent', spy);
+    ev.on('someEvent', spy1);
+    ev.on('someEvent', spy2, obj);
+
+    ev.off('someEvent', spy);
+    ev.off('someEvent', spy2, obj);
+
+    expect(ev.callbacks['someEvent'].length).toBe(1);
+    expect(ev.callbacks['someEvent'][0]['callback']).toEqual(spy1);
+  });
+
 });

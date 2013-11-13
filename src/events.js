@@ -67,25 +67,13 @@
       if (this.callbacks && this.callbacks[event]) {
         callbacks = this.callbacks[event];
 
-        if (!obj) {
-          // remove lone function
-          while (callbackObj = callbacks[++i]) {
-            
-            if (callbackObj.callback === callback
-                && callbackObj.obj === undefined) {
-              callbacks.splice(i, 1);
-              return;
-            }
-          }
-        } else {
-          // remove object function
-          while (callbackObj = callbacks[++i]) {
-            
-            if (callbackObj.callback === callback
-                && callbackObj.obj === obj) {
-              callbacks.splice(i, 1);
-              return;
-            }
+        // remove object function
+        while (callbackObj = callbacks[++i]) {
+          
+          if (callbackObj.callback === callback
+              && callbackObj.obj === obj) {
+            callbacks.splice(i, 1);
+            return;
           }
         }
       }
