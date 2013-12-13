@@ -7,10 +7,17 @@
  * basic support for observation.  There are no dependencies.
  * 
  */ 
-(function (exports) {
-  // helper function to determine if a callback is in fact a function
+;(function (exports) {
+  'use strict';
+
+  // helper function to determine if a variable is a function
   var isFunction = function (func) {
     return (typeof func === 'function');
+  };
+
+  // helper function to determine if a variable is a string/String
+  var isString = function (str) {
+    return (typeof str === 'string') || (str.constructor === String);
   };
 
   var Events = (function () {
@@ -27,12 +34,17 @@
      * @param {String} event - a string name for the event to watch
      * @param {Function} callback - the observer callback function to call when the event is triggered
      * @param {Object} [obj] - the observer object for callback binding
+     * @throws {Error} if event is not a string
      * @throws {Error} if callback is not a function
      */
     f.fn.on = function (event, callback, obj) {
+      // if event is not a string, throw an exception
+      if (!isString(event)) {
+        throw new Error('event is expected to be a string: ' + (typeof event) + ' found.');
+      }
       // if callback is not a function, throw an exception
       if (!isFunction(callback)) {
-        throw new Error('callback is not a function');
+        throw new Error('callback is expected to be a function: ' + (typeof callback) + ' found.');
       }
 
       // ensure that the instance has an events hash and check for previous callbacks
@@ -52,16 +64,21 @@
      * @param {String} event - a string name for the event to remove the callback on
      * @param {Function} callback - the callback function to remove from the object's specified event
      * @param {Object} [obj] - the observer object for callback binding
+     * @throws {Error} if event is not a string
      * @throws {Error} if callback is not a function
      */
     f.fn.off = function (event, callback, obj) {
+      // if event is not a string, throw an exception
+      if (!isString(event)) {
+        throw new Error('event is expected to be a string: ' + (typeof event) + ' found.');
+      }
       // if callback is not a function, throw an exception
       if (!isFunction(callback)) {
-        throw new Error('callback is not a function');
+        throw new Error('callback is expected to be a function: ' + (typeof callback) + ' found.');
       }
 
       var i = -1,
-          callback,
+          callbackObj,
           callbacks;
       
       if (this.callbacks && this.callbacks[event]) {
@@ -83,8 +100,13 @@
      * Trigger an event on this object.  All callbacks registered for the supplied event
      * will be called and passed this object as a single argument.
      * @param {String} event - a string name for the event to trigger
+     * @throws {Error} if event is not a string
      */
     f.fn.trigger = function (event) {
+      if (!isString(event)) {
+        throw new Error('event is expected to be a string: ' + (typeof event) + ' found.');
+      }
+
       var i = -1,
           callbacks,
           callbackObj;
@@ -94,7 +116,7 @@
         callbacks = this.callbacks[event];    
         
         while (callbackObj = callbacks[++i]) {
-          callbackObj.callback.apply(callbackObj.obj || this, [this]);
+          callbackObj.callback.call(callbackObj.obj || this, this);
         }
       }
     };
